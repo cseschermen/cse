@@ -1,1 +1,61 @@
-
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>CSE Weer</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: transparent; /* pas aan naar bv. #000000 als je scherm geen transparantie ondersteunt */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  #plaats {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 2vw;
+    font-weight: 600;
+    color: #0fb6ff;
+    letter-spacing: 0.05em;
+    margin-top: 0.3em;
+  }
+  #weer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0fb6ff;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-weight: 700;
+  }
+  #weer-temp {
+    font-size: 6vw;
+  }
+</style>
+</head>
+<body>
+  <div id="wrapper" style="display:flex; flex-direction:column; align-items:center;">
+    <div id="weer">
+      <span id="weer-temp">--°C</span>
+    </div>
+    <div id="plaats">Zwolle</div>
+  </div>
+  <script>
+    // Weer ophalen voor Zwolle via Open-Meteo (gratis, geen API-key nodig)
+    async function updateWeer() {
+      try {
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=52.5168&longitude=6.0830&current_weather=true&timezone=Europe%2FAmsterdam');
+        const data = await res.json();
+        const temp = Math.round(data.current_weather.temperature);
+        document.getElementById('weer-temp').textContent = temp + '°C';
+      } catch (e) {
+        document.getElementById('weer-temp').textContent = '';
+      }
+    }
+    updateWeer();
+    setInterval(updateWeer, 10 * 60 * 1000); // elke 10 minuten verversen
+  </script>
+</body>
+</html>
