@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>CSE Klok</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: transparent; /* pas aan naar bv. #000000 als je scherm geen transparantie ondersteunt */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  #wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #klok {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 10vw;
+    font-weight: 700;
+    color: #0fb6ff;
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+</style>
+</head>
+<body>
+  <div id="wrapper">
+    <div id="klok">--:--</div>
+  </div>
+  <script>
+    function updateKlok() {
+      const nu = new Date();
+      // Toon Nederlandse tijd (Europe/Amsterdam), ook als het scherm zelf op een andere tijdzone staat
+      const tijd = new Intl.DateTimeFormat('nl-NL', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'Europe/Amsterdam'
+      }).format(nu);
+      document.getElementById('klok').textContent = tijd;
+    }
+    updateKlok();
+    setInterval(updateKlok, 1000);
+  </script>
+</body>
+</html>
