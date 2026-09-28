@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>CSE Corvee</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #ffffff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    #wrapper {
+      padding: 2vh 2.5vh;
+      box-sizing: border-box;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #titel-header {
+      color: #0fb6ff;
+      font-size: 4.2vh;
+      font-weight: 800;
+      text-transform: capitalize;
+      letter-spacing: 0.02em;
+      margin-bottom: 1.5vh;
+    }
+
+    #klassen {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8vh;
+    }
+
+    .klas {
+      color: #000000;
+      font-size: 3.5vh;
+      font-weight: 600;
+      padding: 0.35em 0.5em;
+      border-bottom: 1px solid rgba(0,0,0,0.15);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .klas-naam {
+      color: #000000;
+    }
+
+    .klas-label {
+      color: #0fb6ff;
+      font-weight: 700;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="wrapper">
+  <div id="titel-header">--</div>
+  <div id="klassen"></div>
+</div>
+
+<script>
+// 1. Alle leerlingen op exacte volgorde van 6V omlaag naar 1BK
+const alleKlassen = [
+  { klas: "6V", leerlingen: ["Pepijn Albers", "Krijn Dijkstra", "Robbin Engbers", "Maud Francken", "Edgar Herpel", "Meyke van Hout", "Eveline de Jong", "Teske Kreulen", "Mirte Kroes", "Jurre Lodder", "Jelle van Loon", "Juul Los", "Diego van der Meer", "Maud Meester", "Tessa van der Sande", "Karlijn Schuijzeman", "Jeron Seine", "Job Teklenburg", "Ellemeike Visser", "Ruben van der Wal", "Tim Weijers", "Oskar Welmers", "Fenna Westerneng", "Stijn Wiersum"] },
+  { klas: "5V", leerlingen: ["Nina Adriaansz", "Gideon Bertholee", "Valerie Douma", "Fabian Duijzend", "Puck Eijbersen", "Koen Folkersma", "Maurits Frizo", "Anniek Jeurnink", "Jet Kessels", "Lieke Kramer", "Jinte Landman", "Romyrle ter Maat", "Joachim Meurs", "Migel Meyer", "Tijn Nijhof", "Bryant Nyika", "Lily Ridderbos", "Paula Spans", "Luuk Verburgt", "Esmée Volkers", "Elin de Weerd", "Maurits Witvoet"] },
+  { klas: "5Hb", leerlingen: ["Raff Algera", "Famke Booij", "Mees Denee", "Bas Dertien", "Emma Everaars", "Joshua Gooijer", "Fenna Groot Roessink", "Evi Hartman", "Annelie Hendriksen", "Kai Jacobs", "Inez Jansen", "Niek Kamstra", "Emmi Klomp", "Mart Meijerink", "Jesper Peters", "Ezra Reinds", "Nina Sakkers", "Sophie Slabbekoorn", "Mats van der Sluis", "Twan Snijder", "Laure Steenis", "Kim Veenendaal", "Brecht Veenstra", "Jorai Veenstra", "Chloe Wanders", "Sarah Wanders"] },
+  { klas: "5Ha", leerlingen: ["Isaiah Bakboord", "Sofie Brinksma", "Sofie Bron", "Joshua van Diermen", "Joep Geissler", "Morris Goutbeek", "Fay Hoexum", "Roos Hultink", "Mare Jonkers", "Asad Karaki", "Babet Kleinlugtebeld", "Bo Kramer", "Thijs Leenders", "Judah van Loo", "Ted Lucassen", "Jamano Van der Meulen", "Renske Nijhof", "Johanneke Robbertsen", "Kim van Sambeek", "Naud Schaper", "Sil Strijker", "Julia Talsma", "Roef Tichelaar", "Bink Vente", "Lieve Verhoeff", "Linde Vrielink", "Cato Wierdsma"] },
+  { klas: "4V", leerlingen: ["Femke Boelm", "Seth Bosma", "Fedde Diamant", "Abigail van Diermen", "Manon Eising", "Timur Garaev", "Roos Gerritsen", "Lise Holkamp", "Nadim Jaber", "Meike Jousma", "Noortje Kappers", "Ismay Kaptein", "Sarah Ketelaars", "Elea Koks", "Matteo Luttenberg", "Jila Mosterd", "Olivier van Musscher", "Lyra van Niekerk", "Fleur Paquot", "Deslin Prudencia", "Fenne Schipper", "Elina Schreurs", "Koen ter Steege", "Bente Toth", "Samuel Veenvliet", "Gio Weijs", "Hannah Wevers", "Raaf van de Worp"] },
+  { klas: "4Hb", leerlingen: ["Utonhi E Silva Aragão", "Micah Bogaarts", "Dirk Bongers", "Floris Doldersum", "Pleun Eijbersen", "Merel Engbers", "Jouke van Essen", "Job Everaars", "Chenille Groot", "Britt Haverkate", "Joep Hazewinkel", "Demi van der Hooft", "Moya Kerkhof", "Meike Knol", "Gerdian Leeftink", "Merijn Liebrand", "Tristan Luchies", "Suus Lutterop", "Dax Muijlaert", "Stan Ordelman", "Puk van der Ploeg", "Isa Schoonhoven", "Veronique Schutte", "Kiriana Ubro", "Lize Vogelaar", "Saline Waninge", "Aimey Wasim", "Kevin van Weenum", "Rowin van de Werke"] },
+  { klas: "4Ha", leerlingen: ["Daniel Baffo", "Jayquin Bart", "Jeftha Beroeatwarin", "Bjorn Boessenkool", "Tijani Boudih", "Sten Bovenhoff", "Bo van Bussel", "Lieve Damman", "Nadia van Ditshuizen", "Brent Eenkhoorn", "Douwe Enzerink", "Pelle Frederiks", "Sem Jansen", "Lieve Kuipers", "Jens Lindenhols", "Anoek van Loenen", "Kian Luesink", "Tessa ten Napel", "Sebas Peters", "Luca van Pijkeren", "Sem van Schoonhoven", "Sterre Schuurman", "Owen Smeijers", "Niek van der Toorn", "Lukas Valk", "Noah Vecht", "Lona Vieane", "Evi Visser", "Irem Weerstand"] },
+  { klas: "4TL", leerlingen: ["Maxime Adriaanse", "Herre Bagerman", "Iva Bonne", "Robin Bosman", "Lianne van den Burgt", "Julian Davidis", "Lotte van Deel", "Tijn Gorkink", "Elize Groot Nibbelink", "Jinthe Hoekstra", "Tygo Jonker", "Oliver van Loo", "Lisan Lourens", "Raziel Mostert", "Salomé Mouthaan", "Layla de Nijs", "Madelonne Paalvast", "Noa Petri", "Micha Schotsman", "Noah Sleurink", "Niels Smit", "Danie Spenkelink", "Noah Sturkenboom", "Elin Veenstra", "Stijn Veldhausz", "Matthijs van Velzen", "Tess Visser", "Valerie de Vries", "Mick Weber", "Gian Wellenberg", "Jip Welleweerd", "Fleur Wubbeling"] },
+  { klas: "4BK", leerlingen: ["Isalynn Tahamata", "Robin Abdo", "Daiwy Artz", "Isa Baan", "Adnane Ballari", "Daan Boelman", "Lize Buit", "Carlijne Dalhuisen", "Davin Dijksma", "Givencio Getrouw", "Tess Meulman", "Meldja Njeumen", "Luna Petri", "Milan van Proosdij", "Maurijn Rowaan", "Julia Ruhulessin", "Amani Salih Abdulla", "Nova-Lee Smit", "Fender Spijkerman", "Bregje Stift", "Milo Stolte", "Joab de Vos", "Esmee Klein"] },
+  { klas: "3V", leerlingen: ["Nienke Abbing", "Ilyas Ammi", "Djémairo Balubun", "Noa Bennink", "Ewa Buiter", "Britt Busscher", "Evi Flier", "Gijs van der Flier", "Stije de Graaf", "Mayk Groothuis", "Zoe de Haas", "Anna Horstman", "Diede ter Keurs", "Ilja Knol", "Mees Kupers", "Tygo Liefers", "Wouter van Mossel", "Lois Mulderij", "Anne Schraa", "Lisa Schreur", "Juul van der Staak", "Norah Steenis", "Kirsten de Weerd", "Luna Wouda", "Sophie Boerrigter", "Femke Colenbrander", "Maxim Ridderbos", "Magnus Steinsson", "Nikai Tielenius Kruythoff"] },
+  { klas: "3Hb", leerlingen: ["Safouane Achaibi", "Nina Arling", "Indy Bouwman", "Amelie Brouwer", "Nessim Channouf", "Bram Croese", "Emmanuel Ehizibue", "Pieter Gregoire", "Silvijn Hart", "Hanna Heller", "Boris Mentink", "Marit Peters", "Vajèn Roo", "Livv Schoppink", "Nout Uffing", "Marin Westerhof", "Bente Wetzels", "Dycke de Wit", "Mik Aarse", "Maxwell Ip", "Nasr Msikine", "Noud Folmer", "Job Stronkhorst"] },
+  { klas: "3Ha", leerlingen: ["Luuk ten Asbroek", "Alexandra van Asselt", "Norah Bos", "Lais Hulzebosch", "Vigo Johannes", "Jesper Kersten", "Jesse van de Koot", "Isabelle van de Koppel", "Fior Mangoensentono", "Mica Molenaar", "Zev Nakar", "Noah Poppe", "Sil Prins", "Jochem Schuijzeman", "Tim Slagers", "Juliet Topcu", "Bart Wesselink", "Stella Zanda", "Dide Zandbelt", "Sofia Zuijdevelt", "Indy Dekema", "Inez Hoogendoorn"] },
+  { klas: "3TLb", leerlingen: ["Xander Abbink", "Metz Agema", "Levi van der Bent", "Daan van der Drift", "Torsten van Egteren", "Tai van Genne", "Sam Lievers", "Puck Ligtenbarg", "Jo-Lynn Mulder", "Jodi Prent", "Siebe Roes", "Katelijne Schaffer", "Lennon Sterk", "Jasmijn Torn", "Siem Veneman", "Milan Vreugdenhil", "Danyl Wolff", "Sarah van Zetten", "Bart Zuijdwijk", "Aidan Demirtas", "Yasin Ruitenbeek"] },
+  { klas: "3TLa", leerlingen: ["Ahmed Alfaraj", "Rocky Bollen", "Jan-Willem Hoekstra", "James Hopcutt Castillo", "Tygo Hutten", "Ivy Kirindongo", "Sepp Miftari", "Awet Nuguse", "Aurélio Sabono", "Josiah Samar", "Levi Scharn", "Katja Tigchelaar", "Rens Tijssen", "Adamasarah Tiloy", "Noa van der Vegte", "Amber Wastenecker", "Gijs van Wensveen", "Bas Wermink", "Lisa Willering", "Phileine Wever", "Rosa van der Wal"] },
+  { klas: "3BK", leerlingen: ["Marwan Abdallah", "Daniyah Amroussi", "Kai Boer", "Stijn Gerritsen", "Nate van der Grinten", "Benjamin Huisman", "Lotje Kao", "Tim van Klaveren", "Maud Leeuwis", "Lotte-Zsofie Malkus", "Meysa Reitsma", "Gifairo Rotering", "Eliézer de Sá", "Djélano Sanders", "Danique Stout", "Finn Zwaagman", "Nick Kroon", "Rosalie van Ommen", "Liz van Schoonhoven", "Lotte Schrijer", "Lasse Witwijk"] },
+  { klas: "2V", leerlingen: ["Steyn Besselink", "Rick de Boer", "Jens Bosma", "Sophie Cosman", "Kyan van Dalen", "Andrew van Diermen", "Lisa ter Haar", "Olivier Hartman", "Julius Hoogenraad", "Kyra Huising", "Elin Kremer", "Sem Lobach", "Angelina Machiela", "Tijn van Marion", "Floris Meijers", "Lisa Mensonides", "Roan van der Meulen", "Niels Peters", "Jesper Seine", "Sem van der Spek", "Florine Spin", "Faya Voerman", "Nova Volmer", "Isa Wierbos", "Jannick Brand", "Julia Bogerman", "Sil Brander", "Thirza Cremers", "Zoé Hoekstra", "Cato Kooistra", "Tygo Kuijer", "Djune Wegerif"] },
+  { klas: "2Hb", leerlingen: ["Dex Ankum", "Isa Boerkamp", "Anouk Bouma", "Siem Buitink", "Daan van Dijk", "Pepijn Eijkelkamp", "Luuk Jansen", "Quinten van de Koot", "Femke Laarman", "Fleur Medema", "Jill Meester", "Dagmar Nijenhuis", "Diede Nolte", "Thom Pullen", "Melle Reijs", "Xavi Resokario", "Christian Schimmelpennink", "Roos Schuring", "Sara Slabbekoorn", "Luuk Stalknecht", "Armand Swart", "Isa Weenk", "Liv Wessels", "Isa van Wincoop", "Peter van Woudenberg.", "Joshua Zwinkels", "Mees van der Kolk"] },
+  { klas: "2Ha", leerlingen: ["Suzan van den Belt", "Dion Brakke", "Mees Brinksma", "Mees van Doorn", "Linde Groen", "Nilayda Güngör", "Yorick De Hek", "Mats van der Kamp", "Sam Kolkman", "Milan Kösters", "Maarten de Leeuw", "Tijn Maljers", "Noor Paauw", "Merel Pasman", "Linde Peereboom", "Niek Pleiter", "Berber Prinsen", "Noah Reehorst", "Massimo Simons", "Helvino Somefun", "Noud van de Streek", "Hannah de Vries", "Malyk Yaou Seyni", "Willem Krens", "Mabel Maas", "Jad Alshahaf", "Seth Dalhuisen", "Loek Venhuizen", "Eileen Bril", "Benjamin Tigelaar"] },
+  { klas: "2TL", leerlingen: ["Marlon Ampofo", "Stijn van den Berg", "Tirza Bijsterbosch", "Lizzy Brakke", "Joey Van 't Ende", "Joey van der Holst", "Lieke de Jong", "Carmen de Keijzer", "Josi Knoben", "Doreen Lamberink", "Djamel Njeumen", "Caitlinn Overmars", "Fayenne Pangkey", "Ryan te Raa", "Roemer Timmermans", "Anouk van Veggel", "Farah Velda", "Tim Veneman", "Noralyn Verdriet", "Daphne van der Weijden", "Cassidy Wulff", "Lyam Maathuis", "Daseana Sahertian", "Tessa van Olst", "Yoris Vedder", "Bente Daleman", "Noraly Hamberg", "Sophie Jonk", "Jill Nieuwenhuis", "Kai Tuparia"] },
+  { klas: "2BK", leerlingen: ["Dirk Rietman", "Lynn van den Brink", "Dwayne Castillo Tejeda", "Denys Chalyi", "Feline Hoving", "Jesse lloanusi", "Lucas Jansen Schipper", "Thomas Koedijk", "Keano Koelman", "Luuk Lieferink", "Levi Mensink", "James Njeumen", "Jowen van Veen", "Feline Vermeer", "Tigo de Vries", "Jaylinn Zoloti"] },
+  { klas: "1HVb", leerlingen: ["Rahaf Al Ali", "Calvin Clare", "Sil van Dasler", "Abe van Echtelt", "Jens IJzerman", "Jeraiden Justiana", "Ilke Karamano lu", "Zoë Kloosterman", "Bart Koerhuis", "Brynn Koks", "Jasper Last", "Lucy Melenhorst", "Pelle Mulderij", "Noor Overzet", "Summer Peters", "Esmé Plothe", "Romero Schaeffer", "Liv Schuurman", "Fay Staffhorst", "Daniel Veerman", "Olle Veldhuis", "Naud Verhoef", "Janiek de Weerd", "Arthur Westenbrink", "Floris Wittenberg", "Mason Wolf", "Hugo Wolff", "Siem van der Toorn", "Kjeld Hogeveen"] },
+  { klas: "1Hva", leerlingen: ["Sil Boers", "Vinz Bouterse", "Lou Emmen", "Yoella van Erp", "Faëz Fassi Fehri", "Malieck Fatah Ahmed", "Silvan Janse van Rensburg", "Naut Klingenberg", "Nayéli Limdoean", "Boet van de Luijtgaarden", "Hendrik-Tije van der Maat", "Daniel van der Meulen", "Floris Muis", "Willem Oosterhuis", "Rosa Roskam", "Nathan van Schie", "Romé Schoppink", "Dogukan Soykan", "Inouk Steenis", "Ayla Taspinar", "Saar Tuller", "Jasper van der Veen", "Matthias Veldhuis", "Emmie Veneman", "Morris Vernooij", "Vayen Vormer", "Yinthe van de Werke", "Lois Westerink"] },
+  { klas: "1THb", leerlingen: ["Babet Beldman", "Lorenzo Bleeker", "Valentijn Bos", "Niels Brinks", "Bas Burgers", "Jaélah van Dijk", "Kian Dijksma", "Norah Fransman", "Jesper Gerritsen", "Nino Hertig", "Sepp Holterman", "Rayaan Nzeyimana", "Sijmen van Polen", "Luna Rangel de Melo Carvalho", "Benjamin Staelens", "Liomar Tuitt", "Olivier Witvoet", "Tara van der Wal", "Twan Kattenberg"] },
+  { klas: "1THa", leerlingen: ["Vira Aleksieieva", "Vigo Bakkenes", "Xavi van den Berg", "Maximilian Beroeatwarin", "Wietse Bisschop", "Stijn Bogerman", "Lynn Busscher", "Mees Dalhuisen", "Niels de Groot", "Roan Hekman", "Jurrian Hogenelst", "Daniël Kaatman", "Bas van Klaveren", "Luka Retuadan", "Rein Schipper", "Liv Stronkhorst", "Pepijn van Vliet", "Dani van der Wal", "Ivey Witteveen", "Raaf Wouda", "Serginho Janga"] },
+  { klas: "1BK", leerlingen: ["Rens van Olst", "Ilay Al-Abbudi", "Gabriel Cotorobai", "Sem van Gerner", "Amy Gooren", "Lyanne Groot", "Arie Dirk Kuijt", "Mila Jasmijn Middel", "Kyan Moes", "Carter Njeumen", "Vladimir Olinek", "Guus Overweg", "Leroy Stevens", "Leila Daku"] }
+];
+
+// Platgeslagen array van ALLE leerlingen
+const platteLijst = [];
+alleKlassen.forEach(k => {
+  k.leerlingen.forEach(leerling => {
+    platteLijst.push({ naam: leerling, klas: k.klas });
+  });
+});
+
+const START_DATUM = new Date("2026-08-31T00:00:00");
+
+function getDatumDetails() {
+  const params = new URLSearchParams(window.location.search);
+  let datum = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Amsterdam" }));
+
+  const override = params.get("datum");
+  if (override) {
+    return { datum: new Date(override + "T00:00:00"), isMorgen: params.get("morgen") === "true" };
+  }
+
+  const isMorgen = params.get("morgen") === "true";
+  if (isMorgen) {
+    datum.setDate(datum.getDate() + 1);
+  }
+
+  return { datum, isMorgen };
+}
+
+function berekenSchooldagenVanafStart(doelDatum) {
+  let teller = 0;
+  let cursor = new Date(START_DATUM.getTime());
+  
+  cursor.setHours(0,0,0,0);
+  const target = new Date(doelDatum.getTime());
+  target.setHours(0,0,0,0);
+
+  while (cursor < target) {
+    const dag = cursor.getDay();
+    if (dag !== 0 && dag !== 6) { // Geen weekend
+      teller++;
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return teller;
+}
+
+function formatteerDatum(datum) {
+  return new Intl.DateTimeFormat("nl-NL", {
+    weekday: "long",
+    day: "numeric",
+    month: "long"
+  }).format(datum);
+}
+
+function update() {
+  const { datum, isMorgen } = getDatumDetails();
+  let dag = datum.getDay();
+
+  // Weekend afhandeling: schuif door naar maandag
+  if (dag === 6) datum.setDate(datum.getDate() + 2);
+  if (dag === 0) datum.setDate(datum.getDate() + 1);
+
+  const schooldagenGeweest = berekenSchooldagenVanafStart(datum);
+  
+  const startIndex = (schooldagenGeweest * 5) % platteLijst.length;
+  const dagSelectie = [];
+
+  for (let i = 0; i < 5; i++) {
+    const index = (startIndex + i) % platteLijst.length;
+    dagSelectie.push(platteLijst[index]);
+  }
+
+  // Toont "Corvee vandaag - [datum]" of "Corvee morgen - [datum]"
+  const label = isMorgen ? "Corvee morgen" : "Corvee vandaag";
+  document.getElementById("titel-header").textContent = label + " - " + formatteerDatum(datum);
+
+  const container = document.getElementById("klassen");
+  container.innerHTML = "";
+
+  dagSelectie.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "klas";
+    div.innerHTML = `
+      <span class="klas-naam">${item.naam}</span>
+      <span class="klas-label">${item.klas}</span>
+    `;
+    container.appendChild(div);
+  });
+}
+
+update();
+setInterval(update, 5 * 60 * 1000);
+</script>
+
+</body>
+</html>
