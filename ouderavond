@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Ouderavond</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    #wrapper {
+      width: 100%;
+      height: 100%;
+      padding: 3vh 4vw;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #titel-header {
+      color: #0fb6ff;
+      font-size: 4.5vh;
+      font-weight: 800;
+      margin-bottom: 2vh;
+      text-transform: capitalize;
+      flex-shrink: 0;
+    }
+
+    #tabel-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      overflow: hidden;
+    }
+
+    .tabel-rij {
+      display: grid;
+      grid-template-columns: 1.2fr 3fr 1fr;
+      align-items: center;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+      padding: 0.8vh 1vw;
+      font-weight: 600;
+    }
+
+    .tabel-header-rij {
+      border-bottom: 4px solid #0fb6ff;
+      font-weight: 800;
+      color: #0fb6ff;
+    }
+
+    .sectie-header {
+      background-color: #f0f8ff;
+      color: #0fb6ff;
+      font-weight: 800;
+      padding: 0.8vh 1vw;
+      margin-top: 1vh;
+      border-left: 6px solid #0fb6ff;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .col-klas {
+      color: #000000;
+    }
+
+    .col-leraar {
+      color: #333333;
+    }
+
+    .col-lokaal {
+      color: #0fb6ff;
+      text-align: right;
+      font-weight: 700;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="wrapper">
+  <div id="titel-header">Ouderavond</div>
+  
+  <div id="tabel-container">
+    <div class="tabel-rij tabel-header-rij">
+      <div class="col-klas">Klas</div>
+      <div class="col-leraar">Leraar/Lerares</div>
+      <div class="col-lokaal">Lokaal</div>
+    </div>
+    <div id="data-rijen"></div>
+  </div>
+</div>
+
+<script>
+// =========================================================================
+// GEGEVENSVOORBEELD / CONFIGURATIE PER OUDERAVOND
+// =========================================================================
+const ouderavonden = {
+  "1": {
+    titel: "Ouderavond",
+    data: [
+      { klas: "2BK", leraar: "Mariana", lokaal: "1" },
+      { klas: "3TLb", leraar: "Joleen", lokaal: "2" },
+      { klas: "3TLa", leraar: "Rudi", lokaal: "3" },
+      { klas: "2Hb", leraar: "Ferry", lokaal: "4" },
+      { klas: "2Ha", leraar: "Annemieke", lokaal: "5" },
+      { klas: "2V", leraar: "Jasmijn", lokaal: "6" },
+      { klas: "2TL", leraar: "George & Tamme", lokaal: "7" },
+      { klas: "3Ha", leraar: "Allard", lokaal: "8" },
+      { klas: "3BK", leraar: "Hans", lokaal: "9a" },
+      { klas: "3Hb", leraar: "Meyke", lokaal: "9b" },
+      { klas: "3V", leraar: "Mieke", lokaal: "12" }
+    ]
+  },
+  
+  "2": {
+    titel: "Ouderavond",
+    data: [
+      { klas: "1BK", leraar: "Jan", lokaal: "1" },
+      { klas: "1THa", leraar: "Karin", lokaal: "2" },
+      { klas: "4V", leraar: "Peter", lokaal: "10" },
+      { klas: "5V", leraar: "Sanne", lokaal: "11" }
+    ]
+  }
+};
+
+// Bepaal de verdieping op basis van het lokaalnummer (1 t/m 9 = Begane grond, >9 = 1e Verdieping)
+function bepaalVerdieping(item) {
+  // Haal alleen de cijfers uit het lokaalnummer (bijv. "9a" -> 9)
+  const lokaalNummer = parseInt(item.lokaal.toString().replace(/\D/g, ''), 10);
+  
+  if (!isNaN(lokaalNummer) && lokaalNummer <= 12) {
+    return "Begane grond";
+  }
+  return "1e Verdieping (Boven)";
+}
+
+function laadOuderavond() {
+  const params = new URLSearchParams(window.location.search);
+  const gekozenAvondKey = params.get("avond") || "1";
+  const actieveAvond = ouderavonden[gekozenAvondKey] || ouderavonden["1"];
+
+  document.getElementById("titel-header").textContent = actieveAvond.titel;
+
+  const container = document.getElementById("data-rijen");
+  container.innerHTML = "";
+
+  // Bepaal per item de verdieping
+  const verwerkteData = actieveAvond.data.map(item => ({
+    ...item,
+    verdieping: bepaalVerdieping(item)
+  }));
+
+  // Sorteer zo dat 'Begane grond' eerst komt en daarna '1e Verdieping'
+  verwerkteData.sort((a, b) => {
+    if (a.verdieping === b.verdieping) return 0;
+    return a.verdieping === "Begane grond" ? -1 : 1;
+  });
+
+  let huidigeVerdieping = "";
+
+  verwerkteData.forEach(item => {
+    if (item.verdieping !== huidigeVerdieping) {
+      huidigeVerdieping = item.verdieping;
+      const headerDiv = document.createElement("div");
+      headerDiv.className = "sectie-header";
+      headerDiv.textContent = huidigeVerdieping;
+      container.appendChild(headerDiv);
+    }
+
+    const div = document.createElement("div");
+    div.className = "tabel-rij";
+    div.innerHTML = `
+      <div class="col-klas">${item.klas}</div>
+      <div class="col-leraar">${item.leraar || item.collega || ""}</div>
+      <div class="col-lokaal">${item.lokaal}</div>
+    `;
+    container.appendChild(div);
+  });
+
+  schaalTekstIn();
+}
+
+// Automatische dynamische lettergrootte berekening
+function schaalTekstIn() {
+  const container = document.getElementById("tabel-container");
+  let fontSize = window.innerHeight * 0.035; 
+
+  container.style.fontSize = fontSize + "px";
+
+  while (container.scrollHeight > container.clientHeight && fontSize > 12) {
+    fontSize -= 0.5;
+    container.style.fontSize = fontSize + "px";
+  }
+}
+
+laadOuderavond();
+window.addEventListener("resize", schaalTekstIn);
+</script>
+
+</body>
+</html>
