@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>CSE Sportnieuws</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #ffffff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    #wrapper {
+      width: 100%;
+      height: 100%;
+      padding: 3vh 3vw;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 2.5vh;
+      border-bottom: 4px solid #0fb6ff;
+      padding-bottom: 1vh;
+      flex-shrink: 0;
+    }
+
+    .titel {
+      color: #0fb6ff;
+      font-size: clamp(2rem, 4.5vh, 3.2rem);
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .nieuws-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2vw;
+      min-height: 0;
+    }
+
+    .nieuws-kaart {
+      background: #f4faff;
+      border-radius: 12px;
+      border-top: 6px solid #0fb6ff;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+
+    .afbeelding-container {
+      height: 40%;
+      width: 100%;
+      background: #e0e0e0;
+      position: relative;
+    }
+
+    .afbeelding-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .tekst-container {
+      padding: 2.5vh 1.8vw;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .nieuws-titel {
+      font-size: clamp(1.2rem, 2.4vh, 1.8rem);
+      font-weight: 700;
+      color: #111111;
+      margin-bottom: 1.5vh;
+      line-height: 1.25;
+    }
+
+    .nieuws-beschrijving {
+      font-size: clamp(0.95rem, 1.8vh, 1.3rem);
+      color: #444444;
+      line-height: 1.35;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div id="wrapper">
+    <div class="header-container">
+      <h1 class="titel">🏆 Sportnieuws</h1>
+    </div>
+    
+    <div class="nieuws-grid" id="nieuws-grid">
+      <div class="nieuws-kaart"><div class="tekst-container"><div class="nieuws-titel">Nieuws laden...</div></div></div>
+      <div class="nieuws-kaart"><div class="tekst-container"><div class="nieuws-titel">Nieuws laden...</div></div></div>
+      <div class="nieuws-kaart"><div class="tekst-container"><div class="nieuws-titel">Nieuws laden...</div></div></div>
+    </div>
+  </div>
+
+  <script>
+    // --- SPORTNIEUWS ---
+    async function haalSportNieuwsOp() {
+      const rssUrl = encodeURIComponent('https://feeds.feedburner.com/nossportalgemeen');
+      const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}`;
+
+      try {
+        const res = await fetch(apiUrl);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.items && data.items.length > 0) {
+            const schoneArtikelen = data.items.filter(item => item.title && item.description);
+            toonDrieArtikelen(schoneArtikelen.slice(0, 3));
+          }
+        }
+      } catch (e) {
+        console.error("Fout bij laden sportnieuws:", e);
+      }
+    }
+
+    function toonDrieArtikelen(artikelen) {
+      const grid = document.getElementById('nieuws-grid');
+      grid.innerHTML = '';
+
+      artikelen.forEach(item => {
+        let schoneBeschrijving = item.description.replace(/<[^>]*>?/gm, '').trim();
+        const zinnen = schoneBeschrijving.split('. ');
+        if (zinnen.length > 0) {
+          const aantalZinnen = Math.min(2, zinnen.length);
+          schoneBeschrijving = zinnen.slice(0, aantalZinnen).join('. ');
+          if (!schoneBeschrijving.endsWith('.')) {
+            schoneBeschrijving += '.';
+          }
+        }
+
+        let imageUrl = null;
+        if (item.thumbnail) {
+          imageUrl = item.thumbnail;
+        } else if (item.enclosure && item.enclosure.link) {
+          imageUrl = item.enclosure.link;
+        }
+
+        const afbHtml = imageUrl 
+          ? `<div class="afbeelding-container"><img src="${imageUrl}" alt="Nieuws"></div>`
+          : '';
+
+        const kaartHtml = `
+          <div class="nieuws-kaart">
+            ${afbHtml}
+            <div class="tekst-container">
+              <div class="nieuws-titel">${item.title}</div>
+              <div class="nieuws-beschrijving">${schoneBeschrijving}</div>
+            </div>
+          </div>
+        `;
+        grid.innerHTML += kaartHtml;
+      });
+    }
+
+    // Starten & elke 10 minuten de meest recente 3 artikelen verversen
+    haalSportNieuwsOp();
+    setInterval(haalSportNieuwsOp, 10 * 60 * 1000);
+  </script>
+</body>
+</html>
